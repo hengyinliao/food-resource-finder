@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#214d3e">
+    <meta name="description" content="A small demonstration of finding food resources through a guided questionnaire.">
+    <title>Food Resource Finder — Prototype</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="data.js" defer></script>
+    <script src="matching.js" defer></script>
+    <script src="i18n.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="index.html" id="home-link">
+        <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M16 26V14M16 19C6 20 5 12 5 8c8 0 12 3 11 11ZM16 15C15 7 20 4 27 4c0 7-3 12-11 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span>Food Resource <strong>Finder</strong><small id="prototype-label">— Prototype</small></span>
+      </a>
+      <div class="header-tools">
+        <div class="language" role="group" aria-labelledby="language-label"><span id="language-label">Language</span><div><button type="button" data-language="en" lang="en" aria-pressed="true">English</button><span aria-hidden="true">|</span><button type="button" data-language="zh" lang="zh-Hans" aria-pressed="false">中文</button></div></div>
+        <button type="button" id="accessibility-button" class="utility-button" aria-expanded="false" aria-controls="accessibility-panel">Accessibility</button>
+      </div>
+    </header>
+    <section id="accessibility-panel" class="accessibility-panel" aria-labelledby="accessibility-title" hidden></section>
+    <main id="main" tabindex="-1"></main>
+    <footer class="site-footer"><details id="about-demo"><summary id="about-title">About this demo</summary><div id="about-content"></div></details><p id="credit">Prototype designed by Hengyin Liao</p></footer>
+    <noscript><p class="noscript">Please enable JavaScript to use the questionnaire. This prototype runs entirely in your browser.</p></noscript>
+  </body>
+</html>

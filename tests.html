@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Food Resource Finder — matching checks</title><script src="data.js"></script><script src="matching.js"></script><style>body{font:16px/1.6 system-ui;max-width:850px;margin:40px auto;padding:0 20px}li{margin:10px 0}.pass{color:#214d3e}.fail{color:#a32416}</style></head><body><h1>Matching checks</h1><p>Deterministic checks against the fictional dataset. <a href="index.html">Open questionnaire</a></p><ol id="checks"></ol><script>
+const baseline = { need: 'meal', audience: 'everyone', neighbourhood: 'any', free: true };
+const friday = new Date('2026-09-18T19:00:00Z');
+const match = changes => FoodMatching.find(FOOD_RESOURCES, {...baseline, ...changes}, friday);
+const assert = condition => { if (!condition) throw new Error('Assertion failed'); };
+const check = (name, test) => {
+  const row = document.createElement('li');
+  try { test(); row.className = 'pass'; row.textContent = `PASS — ${name}`; }
+  catch (error) { row.className = 'fail'; row.textContent = `FAIL — ${name}: ${error.message}`; }
+  document.querySelector('#checks').append(row);
+};
+check('20 unique fictional resources with required fields', () => {
+  assert(FOOD_RESOURCES.length === 20 && new Set(FOOD_RESOURCES.map(r => r.id)).size === 20);
+  assert(FOOD_RESOURCES.every(r => ['name','category','audience','neighbourhood','address','days','hours','cost','registration','accessibility','languages','phone','website','lastVerified'].every(key => key in r)));
+});
+check('Free meals open to everyone: exactly four', () => assert(match({}).length === 4));
+check('Neighbourhood is a strict constraint', () => assert(match({neighbourhood:'Kitsilano'}).map(r=>r.id).join() === '1'));
+check('Families see general and family-specific groceries', () => { const ids=match({need:'groceries',audience:'family'}).map(r=>r.id); assert(ids.includes(10) && ids.includes(2)); });
+check('Everyone excludes age-restricted services', () => assert(!match({free:false}).some(r=>r.id===16)));
+check('A free meal never includes paid meals, even without Free only', () => assert(!match({audience:'senior',free:false}).some(r=>r.id===16)));
+check('Free-only excludes low-cost programs', () => assert(match({need:'groceries'}).every(r=>r.cost==='free')));
+check('Young adults do not see under-18-only programs', () => assert(match({need:'youth',audience:'young-adult'}).map(r=>r.id).join() === '8,14'));
+check('Drop-in preference orders but does not remove matches', () => assert(match({need:'youth',audience:'young-adult',noRegistration:true}).map(r=>r.id).join() === '14,8'));
+check('Youth-specific excludes all-age services', () => assert(match({youth:true}).length === 0));
+check('Step-free filter requires explicitly listed access', () => assert(match({need:'garden',accessNeeds:['stepFree']}).map(r=>r.id).join() === '15'));
+check('Open today checks Vancouver’s Friday schedule', () => assert(match({today:true}).map(r=>r.id).join() === '1,6,12'));
+check('Vancouver date handles midnight UTC and standard time', () => {assert(FoodMatching.vancouverDay(new Date('2026-09-19T01:00:00Z'))===5);assert(FoodMatching.vancouverDay(new Date('2026-01-03T07:00:00Z'))===5);});
+check('Unmatched combination stays empty', () => assert(match({need:'youth',audience:'senior'}).length === 0));
+check('Sorting does not mutate dataset order', () => assert(FOOD_RESOURCES.map(r=>r.id).every((id,i)=>id===i+1)));
+check('Five Chinese resource descriptions are supplied', () => assert(FOOD_RESOURCES.filter(r=>r.descriptionZh).length===5));
+check('Unknown accessibility stays unknown, not false', () => assert(FOOD_RESOURCES[4].accessibility.stepFree === null));
+check('Sample accessibility never claims verification', () => assert(FOOD_RESOURCES.every(r=>r.accessibility.verification==='unverified' && r.accessibility.verifiedAt===null)));
+check('Accessible washroom filter combines with all selected features', () => assert(match({need:'groceries',free:false,accessNeeds:['stepFree','washroom']}).length===0));
+check('Unknown information remains visible without access preferences', () => assert(match({need:'garden'}).some(r=>r.id===5)));
+check('Information-only removes fully unknown profiles', () => assert(match({need:'garden',free:false,accessNeeds:['information']}).map(r=>r.id).join()==='15'));
+check('Known negative attributes count as information, not accessible features', () => {
+  const sample = {...FOOD_RESOURCES[0], accessibility:{stepFree:null,washroom:false,seating:null,lowBarrier:null}};
+  assert(FoodMatching.find([sample],{...baseline,accessNeeds:['information']},friday).length===1);
+  assert(FoodMatching.find([sample],{...baseline,accessNeeds:['washroom']},friday).length===0);
+});
+check('Seating and easy physical access are real filters', () => assert(match({need:'youth',audience:'young-adult',accessNeeds:['seating','lowBarrier']}).map(r=>r.id).join()==='14'));
+check('Approximate area help suggests Kitsilano locally', () => assert(FoodArea.suggest(49.267,-123.165,100)==='Kitsilano'));
+check('Area help refuses outside, imprecise, or invalid locations', () => {
+  assert(FoodArea.suggest(50,-120,100)===null);
+  assert(FoodArea.suggest(49.267,-123.165,5000)===null);
+  assert(FoodArea.suggest(NaN,-123.165,100)===null);
+});
+document.title = `${document.querySelectorAll('.fail').length ? 'FAIL' : 'PASS'} — Food Resource Finder checks`;
+</script></body></html>
