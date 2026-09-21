@@ -54,7 +54,7 @@ Website navigation, controls, decoration and directions prompts are excluded. Th
 
 The prepared workflow in `.github/workflows/pages.yml` publishes only `index.html`, `styles.css`, `data.js`, `matching.js`, `i18n.js`, and `app.js`. Tests, documentation, ZIP archives, and QA screenshots are not included in the deployed website. Links use relative paths so the questionnaire also works at a project URL under `/food-resource-finder/`.
 
-Enable GitHub Pages with **GitHub Actions** as the source before running the workflow. After the workflow is installed, pushes to `main` publish updates. Private-repository Pages availability depends on the GitHub account plan; publishing the source publicly is a separate visibility choice.
+Enable GitHub Pages with **GitHub Actions** as the source before running the workflow. Use **Actions → Publish Food Resource Finder → Run workflow** to publish the latest `main` branch. The workflow is manual, so pushing code alone does not publish changes. Private-repository Pages availability depends on the GitHub account plan; publishing the source publicly is a separate visibility choice.
 
 ## Checks
 
